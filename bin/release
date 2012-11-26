@@ -1,9 +1,5 @@
 #!/usr/bin/env ruby
 
-# Release PhantomJS
-release_phantomjs_path = File.expand_path("../release-phantomjs", __FILE__)
-system release_phantomjs_path
-
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "language_pack"
 

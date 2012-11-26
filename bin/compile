@@ -11,7 +11,3 @@ if pack = LanguagePack.detect(ARGV[0], ARGV[1])
     pack.compile
   end
 end
-
-# Compile PhantomJS
-compile_phantomjs_path = File.expand_path("../compile-phantomjs", __FILE__)
-system "#{compile_phantomjs_path} #{ARGV[0]}, #{ARGV[1]}"

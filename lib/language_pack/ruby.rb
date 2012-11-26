@@ -5,7 +5,7 @@ require "language_pack/base"
 
 # base Ruby Language Pack. This is for any base ruby app.
 class LanguagePack::Ruby < LanguagePack::Base
-  BUILDPACK_VERSION   = "v40"
+  BUILDPACK_VERSION   = "v40-igui"
   LIBYAML_VERSION     = "0.1.4"
   LIBYAML_PATH        = "libyaml-#{LIBYAML_VERSION}"
   BUNDLER_VERSION     = "1.2.1"
@@ -14,6 +14,7 @@ class LanguagePack::Ruby < LanguagePack::Base
   NODE_JS_BINARY_PATH = "node-#{NODE_VERSION}"
   JVM_BASE_URL        = "http://heroku-jvm-langpack-java.s3.amazonaws.com"
   JVM_VERSION         = "openjdk7-latest"
+  PHANTOMJS_URL       = "http://stomita-buildpack-phantomjs.s3.amazonaws.com/buildpack-phantomjs-1.7.0.tar.gz"
 
   # detects if this is a valid Ruby app
   # @return [Boolean] true if it's a Ruby app
@@ -34,6 +35,7 @@ class LanguagePack::Ruby < LanguagePack::Base
       "LANG"     => "en_US.UTF-8",
       "PATH"     => default_path,
       "GEM_PATH" => slug_vendor_base,
+      "LD_LIBRARY_PATH" => "/usr/local/lib:/usr/lib:/lib:#{slug_vendor_base}/phantomjs/lib"
     }
 
     ruby_version_jruby? ? vars.merge("JAVA_OPTS" => default_java_opts, "JRUBY_OPTS" => default_jruby_opts) : vars
@@ -53,6 +55,7 @@ class LanguagePack::Ruby < LanguagePack::Base
     install_jvm
     setup_language_pack_environment
     setup_profiled
+    install_phantomjs
     allow_git do
       install_language_pack_gems
       build_bundler
@@ -303,6 +306,24 @@ ERROR
         run("curl #{VENDOR_URL}/#{gem}.tgz -s -o - | tar xzf -")
       end
       Dir["bin/*"].each {|path| run("chmod 755 #{path}") }
+    end
+  end
+
+  # vendors an individual plugin
+  # @param [String] name of the plugin
+  def install_phantomjs()
+    plugin_dir = "vendor/plugins/phantomjs"
+    return if File.exist?(plugin_dir)
+    puts "Injecting PhantomJS"
+    FileUtils.mkdir_p plugin_dir
+    Dir.chdir(plugin_dir) do |dir|
+      run("curl #{PHANTOMJS_URL} -s -o - | tar xzf -")
+    end
+
+    bin_dir = "bin"
+    FileUtils.mkdir_p bin_dir
+    Dir["#{plugin_dir}/bin/*"].each do |bin|
+      run("ln -s ../#{bin} #{bin_dir}")
     end
   end
 
