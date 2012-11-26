@@ -3,6 +3,10 @@
 # sync output
 $stdout.sync = true
 
+# Release PhantomJS
+compile_phantomjs_path = File.expand_path("../compile-phantomjs", __FILE__)
+system "#{compile_phantomjs_path} #{ARGV[0]}, #{ARGV[1]}"
+
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "language_pack"
 
@@ -11,6 +15,3 @@ if pack = LanguagePack.detect(ARGV[0], ARGV[1])
     pack.compile
   end
 end
-
-# PhantomJS compilation
-`./compile-phantomjs`
